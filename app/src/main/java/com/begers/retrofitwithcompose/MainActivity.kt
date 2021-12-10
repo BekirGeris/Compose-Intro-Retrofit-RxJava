@@ -9,6 +9,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.ObserverHandle
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -39,6 +41,9 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen(){
+    var cryptoModels = remember {
+        mutableStateListOf<CryptoModel>()
+    }
     val compositeDisposable = CompositeDisposable()
     val BASE_URL = "https://api.nomics.com/v1/"
 
@@ -53,19 +58,15 @@ fun MainScreen(){
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
-            { value -> println("Received: $value") },
+            { value -> cryptoModels.addAll(value)},
             { error -> println("Error: $error") },
             { println("Completed!") }
         ))
 
 
     Scaffold(topBar = {AppBar()}) {
-
+        CryptoList(cryptos = cryptoModels)
     }
-
-    Spacer(modifier = Modifier.padding(1.dp))
-
-    CryptoRow(crypto = CryptoModel("BTC", "500000"))
 }
 
 @Composable
